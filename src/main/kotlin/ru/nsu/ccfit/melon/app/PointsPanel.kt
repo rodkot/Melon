@@ -15,11 +15,12 @@ import java.awt.event.MouseEvent
 import java.util.*
 import javax.swing.JPanel
 import javax.swing.event.MouseInputAdapter
-import kotlin.math.max
+import kotlin.math.cos
+import kotlin.math.sin
 import kotlin.math.sqrt
 
 
-class PointsPanel(private val sceneParameters: SceneParameters) : JPanel() {
+class PointsPanel(private val parameters: Parameters) : JPanel() {
     private val logger = KotlinLogging.logger {}
 
     inner class PointDragListener() : MouseInputAdapter() {
@@ -102,7 +103,7 @@ class PointsPanel(private val sceneParameters: SceneParameters) : JPanel() {
 
     init {
         points = ArrayList<MovablePoint2D>()
-        for (point in sceneParameters.splineBasePoints) {
+        for (point in parameters.splineBasePoints) {
             points.add(MovablePoint2D(point.x, point.y))
         }
         background = BACKGROUND_COLOR
@@ -117,7 +118,7 @@ class PointsPanel(private val sceneParameters: SceneParameters) : JPanel() {
     }
 
     fun addPoint(imageX: Int, imageY: Int) {
-        val newPoint: MovablePoint2D = MovablePoint2D(imageX, imageY)
+        val newPoint = MovablePoint2D(imageX, imageY)
         if (points.isEmpty()) {
             points.add(newPoint)
         } else {
@@ -172,7 +173,7 @@ class PointsPanel(private val sceneParameters: SceneParameters) : JPanel() {
 
     private fun drawSpline(g2: Graphics2D) {
         val spline = BSpline(points.toTypedArray())
-        val splinePoints = spline.getSplinePoints(sceneParameters.splineN) ?: return
+        val splinePoints = spline.getPoints(parameters.splineN)
         val width = width
         val height = height
         g2.color = SPLINE_COLOR
@@ -203,7 +204,7 @@ class PointsPanel(private val sceneParameters: SceneParameters) : JPanel() {
     val splinePoints: List<Point2D>
         get() {
             val spline = BSpline(points.toTypedArray())
-            return spline.getSplinePoints(sceneParameters.splineN).toList()
+            return spline.getPoints(parameters.splineN).toList()
         }
 
     val basePoints: List<Point2D>
@@ -215,41 +216,35 @@ class PointsPanel(private val sceneParameters: SceneParameters) : JPanel() {
             return res
         }
 
-    private fun findMaxCoordinate(): Double {
-        val xMax = splinePoints.stream().max(Comparator.comparingDouble { it.x }).get().x
-        val yMax = splinePoints.stream().max(Comparator.comparingDouble { it.y }).get().y
-        return max(xMax, yMax)
-    }
-
     val scenePoints: List<Array<Matrix>>
         get() {
-            val points2d: List<Point2D> = splinePoints
+            val points2d = splinePoints
             val vertices = ArrayList<Array<Matrix>>()
-            val angleN = sceneParameters.angleN * sceneParameters.virtualAngleN
-            val a = width * 1.0 / height
-            val psStep = sceneParameters.splineN
+            val angleN = parameters.angleN * parameters.virtualAngleN
+            val a = width.toDouble() / height
+            val psStep = parameters.splineN
             val k = 1.0
             for (j in 0 until angleN) {
                 var i = 0
                 while (i < points2d.size) {
                     val p = points2d[i]
-                    val Fiv = p.x * k
-                    val Fuv = p.y * k
+                    val fiv = p.x * k
+                    val fuv = p.y * k
                     vertices.add(
                         arrayOf(
                             Matrix(
                                 doubleArrayOf(
-                                    Fiv * Math.cos(j * 2 * Math.PI / angleN) * a,
-                                    Fiv * Math.sin(j * 2 * Math.PI / angleN) * a,
-                                    Fuv,
+                                    fiv * cos(j * 2 * Math.PI / angleN) * a,
+                                    fiv * sin(j * 2 * Math.PI / angleN) * a,
+                                    fuv,
                                     1.0
                                 )
                             ),
                             Matrix(
                                 doubleArrayOf(
-                                    Fiv * Math.cos((j + 1) % angleN * 2 * Math.PI / angleN) * a,
-                                    Fiv * Math.sin((j + 1) % angleN * 2 * Math.PI / angleN) * a,
-                                    Fuv,
+                                    fiv * cos((j + 1) % angleN * 2 * Math.PI / angleN) * a,
+                                    fiv * sin((j + 1) % angleN * 2 * Math.PI / angleN) * a,
+                                    fuv,
                                     1.0
                                 )
                             )
@@ -262,7 +257,7 @@ class PointsPanel(private val sceneParameters: SceneParameters) : JPanel() {
                 }
             }
 
-            val normalAngleN = sceneParameters.angleN
+            val normalAngleN = parameters.angleN
 
             for (i in 1 until points2d.size) {
                 for (j in 0 until normalAngleN) {
@@ -272,16 +267,16 @@ class PointsPanel(private val sceneParameters: SceneParameters) : JPanel() {
                         arrayOf(
                             Matrix(
                                 doubleArrayOf(
-                                    p1.x * k * Math.cos(j * 2 * Math.PI / normalAngleN) * a,
-                                    p1.x * k * Math.sin(j * 2 * Math.PI / normalAngleN) * a,
+                                    p1.x * k * cos(j * 2 * Math.PI / normalAngleN) * a,
+                                    p1.x * k * sin(j * 2 * Math.PI / normalAngleN) * a,
                                     p1.y * k,
                                     1.0
                                 )
                             ),
                             Matrix(
                                 doubleArrayOf(
-                                    p2.x * k * Math.cos(j * 2 * Math.PI / normalAngleN) * a,
-                                    p2.x * k * Math.sin(j * 2 * Math.PI / normalAngleN) * a,
+                                    p2.x * k * cos(j * 2 * Math.PI / normalAngleN) * a,
+                                    p2.x * k * sin(j * 2 * Math.PI / normalAngleN) * a,
                                     p2.y * k,
                                     1.0
                                 )

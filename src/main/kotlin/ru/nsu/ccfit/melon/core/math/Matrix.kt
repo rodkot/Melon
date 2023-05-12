@@ -5,42 +5,37 @@ import java.io.Serializable
 
 class Matrix : Serializable {
 
-    private val M: Int
+    private val matrixM: Int
 
-    private val N: Int
+    private val matrixN: Int
     private val data: Array<DoubleArray>
 
     constructor(data: Array<DoubleArray>) {
-        M = data.size
-        N = data[0].size
-        this.data = Array(M) { DoubleArray(N) }
-        for (i in 0 until M) {
-            System.arraycopy(data[i], 0, this.data[i], 0, N)
+        matrixM = data.size
+        matrixN = data[0].size
+        this.data = Array(matrixM) { DoubleArray(matrixN) }
+        for (i in 0 until matrixM) {
+            System.arraycopy(data[i], 0, this.data[i], 0, matrixN)
         }
     }
 
-    /**
-     * Creates a vector (horizontal)
-     *
-     * @param data vector to use
-     */
     constructor(data: DoubleArray) {
-        M = 1
-        N = data.size
-        this.data = Array(M) { DoubleArray(N) }
-        System.arraycopy(data, 0, this.data[0], 0, N)
+        matrixM = 1
+        matrixN = data.size
+        this.data = Array(matrixM) { DoubleArray(matrixN) }
+        System.arraycopy(data, 0, this.data[0], 0, matrixN)
     }
 
     constructor(M: Int, N: Int) {
-        this.M = M
-        this.N = N
+        this.matrixM = M
+        this.matrixN = N
         data = Array(M) { DoubleArray(N) }
     }
 
     fun transpose(): Matrix {
-        val A = Matrix(N, M)
-        for (i in 0 until M) {
-            for (j in 0 until N) {
+        val A = Matrix(matrixN, matrixM)
+        for (i in 0 until matrixM) {
+            for (j in 0 until matrixN) {
                 A.data[j][i] = data[i][j]
             }
         }
@@ -49,13 +44,13 @@ class Matrix : Serializable {
 
     operator fun times(B: Matrix): Matrix {
         val A = this
-        if (A.N != B.M) {
-            throw RuntimeException("Illegal matrix dimensions: " + A.N + " != " + B.M)
+        if (A.matrixN != B.matrixM) {
+            throw RuntimeException("Illegal matrix dimensions: " + A.matrixN + " != " + B.matrixM)
         }
-        val C = Matrix(A.M, B.N)
-        for (i in 0 until C.M) {
-            for (j in 0 until C.N) {
-                for (k in 0 until A.N) {
+        val C = Matrix(A.matrixM, B.matrixN)
+        for (i in 0 until C.matrixM) {
+            for (j in 0 until C.matrixN) {
+                for (k in 0 until A.matrixN) {
                     C.data[i][j] += A.data[i][k] * B.data.get(k).get(j)
                 }
             }
@@ -68,8 +63,8 @@ class Matrix : Serializable {
     }
 
     fun show() {
-        for (i in 0 until M) {
-            for (j in 0 until N) {
+        for (i in 0 until matrixM) {
+            for (j in 0 until matrixN) {
                 System.out.printf("%5.2f ", data[i][j])
             }
             println()

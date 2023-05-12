@@ -5,12 +5,11 @@ import java.io.File
 import java.util.*
 
 
-abstract class Tool {
-    abstract val name: String
-    abstract val iconPath: File
-    abstract val menuPath: String
+abstract class Tool(
+    val name: String
+) {
 
     abstract fun execute(context: Context)
-    open val tooltip = "Use " + name.lowercase(Locale.getDefault())
+    open val tooltip = "Использование " + name.lowercase(Locale.getDefault())
 }
 

@@ -1,14 +1,12 @@
 package ru.nsu.ccfit.melon
 
-import ru.nsu.ccfit.melon.app.MainWindow
-import java.lang.Thread.currentThread
-import javax.swing.ImageIcon
-import javax.swing.JFrame
+import ru.nsu.ccfit.melon.app.Context
 import javax.swing.SwingUtilities
 
 fun main(args: Array<String>) {
+val context = Context
     SwingUtilities.invokeLater {
-        val window = MainWindow(400, 400, "Melon")
+        val window = context.mainFrame
         window.isVisible = true
     }
 

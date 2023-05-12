@@ -1,12 +1,11 @@
 package ru.nsu.ccfit.melon.core.ui
 
 import java.awt.BorderLayout
-import java.awt.Desktop
 import java.awt.event.ActionListener
 import javax.swing.*
 
 
-open class MainFrame() : JFrame() {
+open class PlumFrame() : JFrame() {
     private val menuBar: JMenuBar
     private var toolBar: JToolBar
 
@@ -33,16 +32,8 @@ open class MainFrame() : JFrame() {
         toolBar.add(button)
     }
 
-
-    /**
-     * Constructor where you can specify window size and title
-     *
-     * @param x     - horizontal size of newly created window
-     * @param y     - vertical size of newly created window
-     * @param title - window title
-     */
-    constructor(x: Int, y: Int, title: String) : this() {
-        setSize(x, y)
+    constructor(width: Int, height: Int, title: String) : this() {
+        setSize(width, height)
         isLocationByPlatform = true
         setTitle(title)
     }

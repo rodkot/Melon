@@ -1,6 +1,7 @@
 package ru.nsu.ccfit.melon.app
 
 import mu.KotlinLogging
+
 import ru.nsu.ccfit.melon.core.math.Matrix
 import java.awt.Color
 import java.awt.Graphics
@@ -10,12 +11,13 @@ import java.awt.event.KeyEvent
 import java.awt.event.MouseEvent
 import java.awt.event.MouseWheelEvent
 import javax.swing.JPanel
+import javax.swing.SwingUtilities
 import javax.swing.event.MouseInputAdapter
 import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.math.tan
 
-class Scene : JPanel() {
+class Scene(val parameter: Parameters) : JPanel() {
     private val logger = KotlinLogging.logger {}
 
     init {
@@ -29,23 +31,19 @@ class Scene : JPanel() {
                 super.mousePressed(e)
                 startedX = e.x
                 startedY = e.y
-                savedThetaX = SceneParameters.thetaX
-                savedThetaY = SceneParameters.thetaY
-                savedThetaZ = SceneParameters.thetaZ
+                savedThetaX = parameter.thetaX
+                savedThetaY = parameter.thetaY
+                savedThetaZ = parameter.thetaZ
             }
 
             override fun mouseDragged(e: MouseEvent) {
                 super.mouseDragged(e)
 
-                if (e.button == MouseEvent.BUTTON1) {
+                if (SwingUtilities.isLeftMouseButton(e)) {
                     logger.info { "Перетаскивание левой мышкой" }
-                    SceneParameters.thetaZ = (savedThetaZ + (startedX - e.x) * 0.03)
-                    SceneParameters.thetaX = (savedThetaX + (startedY - e.y) * -0.03)
-                } else if (e.button == MouseEvent.BUTTON3) {
-                    logger.info { "Перетаскивание правой мышкой" }
-                    SceneParameters.thetaY = (savedThetaZ + (startedX - e.x) * 0.03)
-                    SceneParameters.thetaX = (savedThetaX + (startedY - e.y) * -0.03)
-                }else{
+                    parameter.thetaZ = (savedThetaZ + (startedX - e.x) * 0.03)
+                    parameter.thetaX = (savedThetaX + (startedY - e.y) * -0.03)
+                } else {
                     logger.debug { "Перетаскивание $e" }
                 }
                 repaint()
@@ -53,33 +51,21 @@ class Scene : JPanel() {
 
             override fun mouseWheelMoved(e: MouseWheelEvent) {
                 super.mouseWheelMoved(e)
-                SceneParameters.fov += e.preciseWheelRotation * 0.01
+                parameter.fov += e.preciseWheelRotation * 0.01
                 repaint()
             }
         }
-        val keyboardAdapter: KeyAdapter = object : KeyAdapter() {
-            override fun keyPressed(e: KeyEvent) {
-                super.keyPressed(e)
-                if (e.keyChar.code == KeyEvent.VK_UP) {
-                    SceneParameters.thetaX += 0.03
-                    repaint()
-                } else if (e.keyChar.code == KeyEvent.VK_DOWN) {
-                    SceneParameters.thetaX -= 0.03
-                    repaint()
-                }
-            }
-        }
-        addKeyListener(keyboardAdapter)
+
         addMouseListener(mouseAdapter)
         addMouseMotionListener(mouseAdapter)
         addMouseWheelListener(mouseAdapter)
     }
 
-    private fun drawLine(g2: Graphics2D, A: Matrix, B: Matrix, width: Int, height: Int) {
-        val x1 = ((A[0, 0] + 1.0) * width / 2.0).toInt()
-        val y1 = ((A[0, 1] + 1.0) * height / 2.0).toInt()
-        val x2 = ((B[0, 0] + 1.0) * width / 2.0).toInt()
-        val y2 = ((B[0, 1] + 1.0) * height / 2.0).toInt()
+    private fun drawLine(g2: Graphics2D, matrixA: Matrix, matrixB: Matrix, width: Int, height: Int) {
+        val x1 = ((matrixA[0, 0] + 1.0) * width / 2.0).toInt()
+        val y1 = ((matrixA[0, 1] + 1.0) * height / 2.0).toInt()
+        val x2 = ((matrixB[0, 0] + 1.0) * width / 2.0).toInt()
+        val y2 = ((matrixB[0, 1] + 1.0) * height / 2.0).toInt()
         g2.drawLine(
             x1, y1,
             x2, y2
@@ -87,28 +73,23 @@ class Scene : JPanel() {
     }
 
     private fun drawFigure(g2: Graphics2D) {
-        val width = width
-        val height = height
-        val a = height * 1.0 / width
-        val f = 1.0 / tan(SceneParameters.fov / 2)
-        val far = SceneParameters.far
-        val near = SceneParameters.near
-        val q = far / (far - near)
+        val a = height.toDouble() / width
+        val f = 1.0 / tan(parameter.fov / 2)
+
+        val q = parameter.far / (parameter.far - parameter.near)
         val clipMatrix = Matrix(
             arrayOf(
                 doubleArrayOf(a * f, 0.0, 0.0, 0.0),
                 doubleArrayOf(0.0, f, 0.0, 0.0),
                 doubleArrayOf(0.0, 0.0, q, 1.0),
-                doubleArrayOf(0.0, 0.0, (-near * q), 0.0)
+                doubleArrayOf(0.0, 0.0, (-parameter.near * q), 0.0)
             )
         )
-        val thetaX = SceneParameters.thetaX
-        val thetaY = SceneParameters.thetaY
-        val thetaZ = SceneParameters.thetaZ
+
         val rotZ = Matrix(
             arrayOf(
-                doubleArrayOf(cos(thetaZ), sin(thetaZ), 0.0, 0.0),
-                doubleArrayOf(-sin(thetaZ), cos(thetaZ), 0.0, 0.0),
+                doubleArrayOf(cos(parameter.thetaZ), sin(parameter.thetaZ), 0.0, 0.0),
+                doubleArrayOf(-sin(parameter.thetaZ), cos(parameter.thetaZ), 0.0, 0.0),
                 doubleArrayOf(0.0, 0.0, 1.0, 0.0),
                 doubleArrayOf(0.0, 0.0, 0.0, 1.0)
             )
@@ -116,42 +97,34 @@ class Scene : JPanel() {
         val rotX = Matrix(
             arrayOf(
                 doubleArrayOf(1.0, 0.0, 0.0, 0.0),
-                doubleArrayOf(0.0, cos(thetaX), sin(thetaX), 0.0),
-                doubleArrayOf(0.0, -sin(thetaX), cos(thetaX), 0.0),
+                doubleArrayOf(0.0, cos(parameter.thetaX), sin(parameter.thetaX), 0.0),
+                doubleArrayOf(0.0, -sin(parameter.thetaX), cos(parameter.thetaX), 0.0),
                 doubleArrayOf(0.0, 0.0, 0.0, 1.0)
             )
         )
         val rotY = Matrix(
             arrayOf(
-                doubleArrayOf(cos(thetaY), 0.0, sin(thetaY), 0.0),
+                doubleArrayOf(cos(parameter.thetaY), 0.0, sin(parameter.thetaY), 0.0),
                 doubleArrayOf(0.0, 1.0, 0.0, 0.0),
-                doubleArrayOf(-sin(thetaY), 0.0, cos(thetaY), 0.0),
+                doubleArrayOf(-sin(parameter.thetaY), 0.0, cos(parameter.thetaY), 0.0),
                 doubleArrayOf(0.0, 0.0, 0.0, 1.0)
             )
         )
-        val rot = rotX.times(rotY).times(rotZ)
-        g2.color = Color.BLACK
+        val rot = rotX * rotY * rotZ
+        g2.color = Config.BACKGROUND_COLOR
         g2.fillRect(0, 0, width, height)
-        g2.color = Color.WHITE
-        for (line in SceneParameters.points) {
-            val A = line[0].times(rot).times(clipMatrix)
-            val B = line[1].times(rot).times(clipMatrix)
+        g2.color = Config.SPLINE_COLOR
+        for (line in parameter.points) {
+            val A = line[0] * rot * clipMatrix
+            val B = line[1] * rot * clipMatrix
             drawLine(g2, A, B, width, height)
         }
-    }
-
-    private fun drawParams(g2: Graphics2D) {
-        g2.drawString(String.format("Theta X: %.0f°", SceneParameters.thetaX), 5, 20)
-        g2.drawString(String.format("Theta Y: %.0f°", SceneParameters.thetaY), 5, 40)
-        g2.drawString(String.format("Theta Z: %.0f°", SceneParameters.thetaZ), 5, 60)
-        g2.drawString(String.format("FOV: %.0f° (%.2f)", SceneParameters.degFov, SceneParameters.fov), 5, 80)
     }
 
     public override fun paintComponent(g: Graphics) {
         super.paintComponent(g)
         val g2 = g as Graphics2D
         drawFigure(g2)
-        drawParams(g2)
     }
 }
 
