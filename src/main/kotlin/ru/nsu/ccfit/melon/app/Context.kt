@@ -1,5 +1,6 @@
 package ru.nsu.ccfit.melon.app
 
+import ru.nsu.ccfit.melon.app.tool.AboutTool
 import ru.nsu.ccfit.melon.app.tool.OpenTool
 import ru.nsu.ccfit.melon.app.tool.SaveTool
 import ru.nsu.ccfit.melon.app.tool.SceneSettingTool
@@ -13,7 +14,8 @@ object Context {
     private var toolList = listOf(
         OpenTool,
         SaveTool,
-        SceneSettingTool
+        SceneSettingTool,
+        AboutTool
     )
     var mainFrame: JFrame = MainWindow(
         scene = scene,

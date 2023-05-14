@@ -1,7 +1,6 @@
 package ru.nsu.ccfit.melon.app
 
 import ru.nsu.ccfit.melon.core.Point2D
-import ru.nsu.ccfit.melon.core.math.Matrix
 import ru.nsu.ccfit.melon.core.math.Vector
 
 import java.io.Serializable

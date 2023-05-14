@@ -8,9 +8,7 @@ import ru.nsu.ccfit.melon.app.Config.POINT_RADIUS
 import ru.nsu.ccfit.melon.app.Config.SPLINE_COLOR
 import ru.nsu.ccfit.melon.core.Point2D
 import ru.nsu.ccfit.melon.core.math.BSpline
-import ru.nsu.ccfit.melon.core.math.Matrix
 import ru.nsu.ccfit.melon.core.math.Vector
-import ru.nsu.ccfit.melon.core.max
 import java.awt.Graphics
 import java.awt.Graphics2D
 import java.awt.event.MouseEvent

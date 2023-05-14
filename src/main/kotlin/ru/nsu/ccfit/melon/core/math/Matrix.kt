@@ -54,13 +54,4 @@ open class Matrix : Serializable {
     operator fun get(i: Int, j: Int): Double {
         return data[i][j]
     }
-
-    fun show() {
-        for (i in 0 until m) {
-            for (j in 0 until n) {
-                System.out.printf("%5.2f ", data[i][j])
-            }
-            println()
-        }
-    }
 }
