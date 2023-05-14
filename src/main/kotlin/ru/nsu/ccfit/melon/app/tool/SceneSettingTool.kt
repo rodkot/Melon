@@ -8,7 +8,7 @@ import java.io.File
 
 
 object SceneSettingTool : Tool(
-    name = "Edit parameters"
+    name = "Параметры"
 ) {
     override fun execute(context: Context) {
         val frame = SettingFrame(context)

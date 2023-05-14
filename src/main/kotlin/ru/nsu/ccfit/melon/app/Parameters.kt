@@ -7,7 +7,7 @@ import ru.nsu.ccfit.melon.core.math.Vector
 import java.io.Serializable
 
 
-object Parameters : Serializable {
+class Parameters : Serializable {
     var splineBasePoints = listOf<Point2D>()
     var points = listOf<Array<Vector>>()
 

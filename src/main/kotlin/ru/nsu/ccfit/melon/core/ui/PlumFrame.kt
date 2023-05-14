@@ -33,7 +33,7 @@ open class PlumFrame() : JFrame() {
     }
 
     constructor(width: Int, height: Int, title: String) : this() {
-        setSize(width, height)
+        setSize(width, height   )
         isLocationByPlatform = true
         setTitle(title)
     }
