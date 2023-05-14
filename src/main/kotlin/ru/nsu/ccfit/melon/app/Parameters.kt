@@ -2,13 +2,14 @@ package ru.nsu.ccfit.melon.app
 
 import ru.nsu.ccfit.melon.core.Point2D
 import ru.nsu.ccfit.melon.core.math.Matrix
+import ru.nsu.ccfit.melon.core.math.Vector
 
 import java.io.Serializable
 
 
 object Parameters : Serializable {
     var splineBasePoints = listOf<Point2D>()
-    var points = listOf<Array<Matrix>>()
+    var points = listOf<Array<Vector>>()
 
     var fov = 60.0 * (Math.PI / 180.0)
     var far = 10

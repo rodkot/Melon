@@ -3,7 +3,7 @@ package ru.nsu.ccfit.melon.core.math
 import java.io.Serializable
 
 
-class Matrix : Serializable {
+open class Matrix : Serializable {
 
     private val matrixM: Int
 
@@ -17,13 +17,6 @@ class Matrix : Serializable {
         for (i in 0 until matrixM) {
             System.arraycopy(data[i], 0, this.data[i], 0, matrixN)
         }
-    }
-
-    constructor(data: DoubleArray) {
-        matrixM = 1
-        matrixN = data.size
-        this.data = Array(matrixM) { DoubleArray(matrixN) }
-        System.arraycopy(data, 0, this.data[0], 0, matrixN)
     }
 
     constructor(M: Int, N: Int) {

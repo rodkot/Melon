@@ -30,11 +30,11 @@ class BSpline(private val points: Array<Point2D>) {
                 xPoints[cnt] = points[i + cnt - 1].x
                 yPoints[cnt] = points[i + cnt - 1].y
             }
-            val matrixG_su: Matrix = Matrix(xPoints).transpose()
-            val matrixG_sv: Matrix = Matrix(yPoints).transpose()
+            val matrixG_su = Vector(xPoints).transpose()
+            val matrixG_sv = Vector(yPoints).transpose()
             for (j in 0..n) {
                 val t = j * 1.0 / n
-                val matrixT = Matrix(doubleArrayOf(t * t * t, t * t, t, 1.0))
+                val matrixT = Vector(doubleArrayOf(t * t * t, t * t, t, 1.0))
                 val uPoints = matrixT * matrixM_s * matrixG_su
                 val vPoints = matrixT * matrixM_s * matrixG_sv
                 totalPoints[(i - 1) * (n + 1) + j] = Point2D(

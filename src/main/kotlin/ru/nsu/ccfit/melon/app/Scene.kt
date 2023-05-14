@@ -51,7 +51,7 @@ class Scene(val parameter: Parameters) : JPanel() {
 
             override fun mouseWheelMoved(e: MouseWheelEvent) {
                 super.mouseWheelMoved(e)
-                parameter.fov += e.preciseWheelRotation * 0.01
+                parameter.fov += e.preciseWheelRotation * 0.1
                 repaint()
             }
         }
