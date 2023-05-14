@@ -10,15 +10,15 @@ import ru.nsu.ccfit.melon.core.Point2D
 import ru.nsu.ccfit.melon.core.math.BSpline
 import ru.nsu.ccfit.melon.core.math.Matrix
 import ru.nsu.ccfit.melon.core.math.Vector
+import ru.nsu.ccfit.melon.core.max
 import java.awt.Graphics
 import java.awt.Graphics2D
 import java.awt.event.MouseEvent
 import java.util.*
 import javax.swing.JPanel
+import javax.swing.SwingUtilities
 import javax.swing.event.MouseInputAdapter
-import kotlin.math.cos
-import kotlin.math.sin
-import kotlin.math.sqrt
+import kotlin.math.*
 
 
 class PointsPanel(private val parameters: Parameters) : JPanel() {
@@ -57,15 +57,16 @@ class PointsPanel(private val parameters: Parameters) : JPanel() {
         }
 
         override fun mouseDragged(e: MouseEvent) {
-            if (e.button == MouseEvent.BUTTON1 && currentPoint != null) {
+            if (SwingUtilities.isLeftMouseButton(e) && currentPoint != null) {
                 currentPoint?.imageX = e.x
                 currentPoint?.imageY = e.y
                 repaint()
-            } else if (e.button == MouseEvent.BUTTON3) {
-                offsetX = savedOffsetX + e.x - pressedX
-                offsetY = savedOffsetY + e.y - pressedY
-                repaint()
-            }
+       }
+            //else if (SwingUtilities.isRightMouseButton(e)) {
+//                offsetX = savedOffsetX + e.x - pressedX
+//                offsetY = savedOffsetY + e.y - pressedY
+//                repaint()
+//            }
         }
     }
 
@@ -222,29 +223,49 @@ class PointsPanel(private val parameters: Parameters) : JPanel() {
             val points2d = splinePoints
             val vertices = ArrayList<Array<Vector>>()
             val angleN = parameters.angleN * parameters.virtualAngleN
-            val a = width.toDouble() / height
             val psStep = parameters.splineN
-            val k = 1.0
+//
+//            val pointMaxY = splinePoints.max { p1, p2 ->
+//                p1.y < p2.y
+//            }
+//            val pointMinY = splinePoints.max { p1, p2 ->
+//                p1.y > p2.y
+//            }
+//            val pointMaxX = splinePoints.max { p1, p2 ->
+//                p1.x < p2.x
+//            }
+//            val pointMinX = splinePoints.max { p1, p2 ->
+//                p1.x > p2.x
+//
+//            }
+//
+//            val width = pointMaxX.x - pointMinX.x
+//            val height = pointMaxY.y - pointMinY.y
+//
+//            val scale = arrayOf(width, height, 1).maxBy { it.toInt() }
+//
+
+
             for (j in 0 until angleN) {
                 var i = 0
                 while (i < points2d.size) {
                     val p = points2d[i]
-                    val fiv = p.y * k
-                    val fuv = p.x * k
+                    val fiv = p.y
+                    val fuv = p.x
                     vertices.add(
                         arrayOf(
                             Vector(
                                 doubleArrayOf(
-                                    fiv * cos(j * 2 * Math.PI / angleN) * a,
-                                    fiv * sin(j * 2 * Math.PI / angleN) * a,
+                                    fiv * cos(j * 2 * Math.PI / angleN),
+                                    fiv * sin(j * 2 * Math.PI / angleN),
                                     fuv,
                                     1.0
                                 )
                             ),
                             Vector(
                                 doubleArrayOf(
-                                    fiv * cos((j + 1) % angleN * 2 * Math.PI / angleN) * a,
-                                    fiv * sin((j + 1) % angleN * 2 * Math.PI / angleN) * a,
+                                    fiv * cos((j + 1) % angleN * 2 * Math.PI / angleN),
+                                    fiv * sin((j + 1) % angleN * 2 * Math.PI / angleN),
                                     fuv,
                                     1.0
                                 )
@@ -268,17 +289,17 @@ class PointsPanel(private val parameters: Parameters) : JPanel() {
                         arrayOf(
                             Vector(
                                 doubleArrayOf(
-                                    p1.y * k * cos(j * 2 * Math.PI / normalAngleN) * a,
-                                    p1.y * k * sin(j * 2 * Math.PI / normalAngleN) * a,
-                                    p1.x * k,
+                                    p1.y * cos(j * 2 * Math.PI / normalAngleN),
+                                    p1.y * sin(j * 2 * Math.PI / normalAngleN),
+                                    p1.x,
                                     1.0
                                 )
                             ),
                             Vector(
                                 doubleArrayOf(
-                                    p2.y * k * cos(j * 2 * Math.PI / normalAngleN) * a,
-                                    p2.y * k * sin(j * 2 * Math.PI / normalAngleN) * a,
-                                    p2.x * k,
+                                    p2.y * cos(j * 2 * Math.PI / normalAngleN),
+                                    p2.y * sin(j * 2 * Math.PI / normalAngleN),
+                                    p2.x,
                                     1.0
                                 )
                             )
@@ -286,6 +307,7 @@ class PointsPanel(private val parameters: Parameters) : JPanel() {
                     )
                 }
             }
+
             return vertices
         }
 

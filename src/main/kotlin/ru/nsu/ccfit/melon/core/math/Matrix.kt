@@ -5,50 +5,50 @@ import java.io.Serializable
 
 open class Matrix : Serializable {
 
-    private val matrixM: Int
+    private val m: Int
+    private val n: Int
 
-    private val matrixN: Int
     private val data: Array<DoubleArray>
 
     constructor(data: Array<DoubleArray>) {
-        matrixM = data.size
-        matrixN = data[0].size
-        this.data = Array(matrixM) { DoubleArray(matrixN) }
-        for (i in 0 until matrixM) {
-            System.arraycopy(data[i], 0, this.data[i], 0, matrixN)
+        m = data.size
+        n = data[0].size
+        this.data = Array(m) { DoubleArray(n) }
+        for (i in 0 until m) {
+            System.arraycopy(data[i], 0, this.data[i], 0, n)
         }
     }
 
-    constructor(M: Int, N: Int) {
-        this.matrixM = M
-        this.matrixN = N
-        data = Array(M) { DoubleArray(N) }
+    constructor(m: Int, n: Int) {
+        this.m = m
+        this.n = n
+        data = Array(m) { DoubleArray(n) }
     }
 
     fun transpose(): Matrix {
-        val A = Matrix(matrixN, matrixM)
-        for (i in 0 until matrixM) {
-            for (j in 0 until matrixN) {
-                A.data[j][i] = data[i][j]
+        val matrixA = Matrix(n, m)
+        for (i in 0 until m) {
+            for (j in 0 until n) {
+                matrixA.data[j][i] = data[i][j]
             }
         }
-        return A
+        return matrixA
     }
 
     operator fun times(B: Matrix): Matrix {
-        val A = this
-        if (A.matrixN != B.matrixM) {
-            throw RuntimeException("Illegal matrix dimensions: " + A.matrixN + " != " + B.matrixM)
+        val matrixA = this
+        if (matrixA.n != B.m) {
+            throw RuntimeException("Illegal matrix dimensions: " + matrixA.n + " != " + B.m)
         }
-        val C = Matrix(A.matrixM, B.matrixN)
-        for (i in 0 until C.matrixM) {
-            for (j in 0 until C.matrixN) {
-                for (k in 0 until A.matrixN) {
-                    C.data[i][j] += A.data[i][k] * B.data.get(k).get(j)
+        val matrixC = Matrix(matrixA.m, B.n)
+        for (i in 0 until matrixC.m) {
+            for (j in 0 until matrixC.n) {
+                for (k in 0 until matrixA.n) {
+                    matrixC.data[i][j] += matrixA.data[i][k] * B.data.get(k).get(j)
                 }
             }
         }
-        return C
+        return matrixC
     }
 
     operator fun get(i: Int, j: Int): Double {
@@ -56,8 +56,8 @@ open class Matrix : Serializable {
     }
 
     fun show() {
-        for (i in 0 until matrixM) {
-            for (j in 0 until matrixN) {
+        for (i in 0 until m) {
+            for (j in 0 until n) {
                 System.out.printf("%5.2f ", data[i][j])
             }
             println()
