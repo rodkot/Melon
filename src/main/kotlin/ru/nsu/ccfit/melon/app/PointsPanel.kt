@@ -9,6 +9,7 @@ import ru.nsu.ccfit.melon.app.Config.SPLINE_COLOR
 import ru.nsu.ccfit.melon.core.Point2D
 import ru.nsu.ccfit.melon.core.math.BSpline
 import ru.nsu.ccfit.melon.core.math.Vector
+import ru.nsu.ccfit.melon.core.max
 import java.awt.Graphics
 import java.awt.Graphics2D
 import java.awt.event.MouseEvent
@@ -60,11 +61,6 @@ class PointsPanel(private val parameters: Parameters) : JPanel() {
                 currentPoint?.imageY = e.y
                 repaint()
        }
-            //else if (SwingUtilities.isRightMouseButton(e)) {
-//                offsetX = savedOffsetX + e.x - pressedX
-//                offsetY = savedOffsetY + e.y - pressedY
-//                repaint()
-//            }
         }
     }
 
@@ -110,11 +106,6 @@ class PointsPanel(private val parameters: Parameters) : JPanel() {
         listener = PointDragListener()
         addMouseListener(listener)
         addMouseMotionListener(listener)
-    }
-
-    fun addPoint() {
-        points.add(MovablePoint2D(0.5, 0.5))
-        repaint()
     }
 
     fun addPoint(imageX: Int, imageY: Int) {
@@ -222,32 +213,26 @@ class PointsPanel(private val parameters: Parameters) : JPanel() {
             val vertices = ArrayList<Array<Vector>>()
             val angleN = parameters.angleN * parameters.virtualAngleN
             val psStep = parameters.splineN
-//
-//            val pointMaxY = splinePoints.max { p1, p2 ->
-//                p1.y < p2.y
-//            }
-//            val pointMinY = splinePoints.max { p1, p2 ->
-//                p1.y > p2.y
-//            }
-//            val pointMaxX = splinePoints.max { p1, p2 ->
-//                p1.x < p2.x
-//            }
-//            val pointMinX = splinePoints.max { p1, p2 ->
-//                p1.x > p2.x
-//
-//            }
-//
-//            val width = pointMaxX.x - pointMinX.x
-//            val height = pointMaxY.y - pointMinY.y
-//
-//            val scale = arrayOf(width, height, 1).maxBy { it.toInt() }
-//
+
+            val pointMaxY = splinePoints.max { p1, p2 ->
+                abs(p1.y) < abs(p2.y)
+            }
+
+            val pointMaxX = splinePoints.max { p1, p2 ->
+                abs(p1.x) < abs(p2.x)
+            }
+
+
+
+            val scale = arrayOf(pointMaxX.x, pointMaxY.y).max()
+
+           val points2dInUnit  = points2d.map { Point2D(it.x/scale,it.y/scale)  }
 
 
             for (j in 0 until angleN) {
                 var i = 0
-                while (i < points2d.size) {
-                    val p = points2d[i]
+                while (i < points2dInUnit.size) {
+                    val p = points2dInUnit[i]
                     val fiv = p.y
                     val fuv = p.x
                     vertices.add(
@@ -270,8 +255,8 @@ class PointsPanel(private val parameters: Parameters) : JPanel() {
                             )
                         )
                     )
-                    if (i + psStep >= points2d.size - 1 && i != points2d.size - 1) {
-                        i = points2d.size - 1 - psStep
+                    if (i + psStep >= points2dInUnit.size - 1 && i != points2dInUnit.size - 1) {
+                        i = points2dInUnit.size - 1 - psStep
                     }
                     i += psStep
                 }
@@ -279,10 +264,10 @@ class PointsPanel(private val parameters: Parameters) : JPanel() {
 
             val normalAngleN = parameters.angleN
 
-            for (i in 1 until points2d.size) {
+            for (i in 1 until points2dInUnit.size) {
                 for (j in 0 until normalAngleN) {
-                    val p1 = points2d[i]
-                    val p2 = points2d[i - 1]
+                    val p1 = points2dInUnit[i]
+                    val p2 = points2dInUnit[i - 1]
                     vertices.add(
                         arrayOf(
                             Vector(

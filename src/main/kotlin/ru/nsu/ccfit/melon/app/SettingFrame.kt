@@ -10,7 +10,7 @@ import java.awt.GridLayout
 import javax.swing.JPanel
 
 
-class SettingFrame(context: Context) : PlumFrame(width = 800, height = 800, title = SceneSettingTool.tooltip) {
+class SettingFrame(context: Context) : PlumFrame(width = 400, height = 400, title = SceneSettingTool.tooltip) {
     private val context: Context
     private lateinit var pointsPanel: PointsPanel
 
