@@ -10,7 +10,7 @@ class Parameters : Serializable {
     var splineBasePoints = listOf<Point2D>()
     var points = listOf<Array<Vector>>()
 
-    var fov = 60.0 * (Math.PI / 180.0)
+    var fov = 40 * (Math.PI / 180.0)
     var far = 10
     var near = 0.1
 
@@ -21,19 +21,4 @@ class Parameters : Serializable {
     var thetaX = 0.0
     var thetaY = 0.0
     var thetaZ = 0.0
-
-
-    private fun degToRad(deg: Double): Double {
-        return deg * (Math.PI / 180.0)
-    }
-
-    private fun radToDeg(rad: Double): Double {
-        return rad * (180.0 / Math.PI)
-    }
-
-    var degFov: Double
-        get() = radToDeg(fov)
-        set(degFov) {
-            fov = (degToRad(degFov))
-        }
 }

@@ -9,6 +9,7 @@ import ru.nsu.ccfit.melon.app.Config.SPLINE_COLOR
 import ru.nsu.ccfit.melon.core.Point2D
 import ru.nsu.ccfit.melon.core.math.BSpline
 import ru.nsu.ccfit.melon.core.math.Vector
+import ru.nsu.ccfit.melon.core.math.max
 import ru.nsu.ccfit.melon.core.max
 import java.awt.Graphics
 import java.awt.Graphics2D
@@ -60,7 +61,7 @@ class PointsPanel(private val parameters: Parameters) : JPanel() {
                 currentPoint?.imageX = e.x
                 currentPoint?.imageY = e.y
                 repaint()
-       }
+            }
         }
     }
 
@@ -207,6 +208,21 @@ class PointsPanel(private val parameters: Parameters) : JPanel() {
             return res
         }
 
+    private fun scale(points: List<Vector>): Double {
+
+        val pointMaxX = points.max { p1, p2 ->
+            abs(p1.x) < abs(p2.x)
+        }
+        val pointMaxY = points.max { p1, p2 ->
+            abs(p1.y) < abs(p2.y)
+        }
+        val pointMaxZ = points.max { p1, p2 ->
+            abs(p1.z) < abs(p2.z)
+        }
+
+        return max(max(pointMaxX.x, pointMaxY.y), pointMaxZ.z)
+    }
+
     val scenePoints: List<Array<Vector>>
         get() {
             val points2d = splinePoints
@@ -214,49 +230,38 @@ class PointsPanel(private val parameters: Parameters) : JPanel() {
             val angleN = parameters.angleN * parameters.virtualAngleN
             val psStep = parameters.splineN
 
-            val pointMaxY = splinePoints.max { p1, p2 ->
-                abs(p1.y) < abs(p2.y)
-            }
-
-            val pointMaxX = splinePoints.max { p1, p2 ->
-                abs(p1.x) < abs(p2.x)
-            }
-
-
-
-            val scale = arrayOf(pointMaxX.x, pointMaxY.y).max()
-
-           val points2dInUnit  = points2d.map { Point2D(it.x/scale,it.y/scale)  }
-
+            var scale = 0.0
 
             for (j in 0 until angleN) {
                 var i = 0
-                while (i < points2dInUnit.size) {
-                    val p = points2dInUnit[i]
+                while (i < points2d.size) {
+                    val p = points2d[i]
                     val fiv = p.y
                     val fuv = p.x
-                    vertices.add(
-                        arrayOf(
-                            Vector(
-                                doubleArrayOf(
-                                    fiv * cos(j * 2 * Math.PI / angleN),
-                                    fiv * sin(j * 2 * Math.PI / angleN),
-                                    fuv,
-                                    1.0
-                                )
-                            ),
-                            Vector(
-                                doubleArrayOf(
-                                    fiv * cos((j + 1) % angleN * 2 * Math.PI / angleN),
-                                    fiv * sin((j + 1) % angleN * 2 * Math.PI / angleN),
-                                    fuv,
-                                    1.0
-                                )
+                    val arc = arrayOf(
+                        Vector(
+                            doubleArrayOf(
+                                fiv * cos(j * 2 * Math.PI / angleN),
+                                fiv * sin(j * 2 * Math.PI / angleN),
+                                fuv,
+                                1.0
+                            )
+                        ),
+                        Vector(
+                            doubleArrayOf(
+                                fiv * cos((j + 1) % angleN * 2 * Math.PI / angleN),
+                                fiv * sin((j + 1) % angleN * 2 * Math.PI / angleN),
+                                fuv,
+                                1.0
                             )
                         )
                     )
-                    if (i + psStep >= points2dInUnit.size - 1 && i != points2dInUnit.size - 1) {
-                        i = points2dInUnit.size - 1 - psStep
+
+                    scale = max(scale, scale(arc.toList()))
+                    vertices.add(arc)
+
+                    if (i + psStep >= points2d.size - 1 && i != points2d.size - 1) {
+                        i = points2d.size - 1 - psStep
                     }
                     i += psStep
                 }
@@ -264,11 +269,12 @@ class PointsPanel(private val parameters: Parameters) : JPanel() {
 
             val normalAngleN = parameters.angleN
 
-            for (i in 1 until points2dInUnit.size) {
+            for (i in 1 until points2d.size) {
                 for (j in 0 until normalAngleN) {
-                    val p1 = points2dInUnit[i]
-                    val p2 = points2dInUnit[i - 1]
-                    vertices.add(
+                    val p1 = points2d[i]
+                    val p2 = points2d[i - 1]
+
+                    val arc =
                         arrayOf(
                             Vector(
                                 doubleArrayOf(
@@ -287,11 +293,33 @@ class PointsPanel(private val parameters: Parameters) : JPanel() {
                                 )
                             )
                         )
-                    )
+                    scale = max(scale, scale(arc.toList()))
+                    vertices.add(arc)
                 }
             }
+            var mx = 0.0
+            var my = 0.0
+            var mz = 0.0
+            //Вписываем в куб
+            val compactVerticales =
+                vertices.map { it ->
+                    it.map {
+                        mx = max(mx,  it.x / scale)
+                        my = max(my,  it.y / scale)
+                        mz = max(mz,  it.z / scale)
 
-            return vertices
+                        Vector(
+                            doubleArrayOf(
+                                it.x / scale,
+                                it.y / scale,
+                                it.z / scale,
+                                1.0
+                            )
+                        )
+                    }.toTypedArray()
+                }
+
+            return compactVerticales
         }
 
     fun reset() {

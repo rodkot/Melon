@@ -2,7 +2,6 @@ package ru.nsu.ccfit.melon.app
 
 import mu.KotlinLogging
 import ru.nsu.ccfit.melon.app.Context.parameters
-
 import ru.nsu.ccfit.melon.core.math.Matrix
 import java.awt.Graphics
 import java.awt.Graphics2D
@@ -13,7 +12,6 @@ import javax.swing.SwingUtilities
 import javax.swing.event.MouseInputAdapter
 import kotlin.math.cos
 import kotlin.math.sin
-import kotlin.math.tan
 
 class Scene() : JPanel() {
     private val logger = KotlinLogging.logger {}
@@ -72,15 +70,12 @@ class Scene() : JPanel() {
 
     private fun drawFigure(g2: Graphics2D) {
         val a = height.toDouble() / width
-        val f = 1.0 / tan(parameters.fov / 2)
-
-        val q = parameters.far / (parameters.far - parameters.near)
         val clipMatrix = Matrix(
             arrayOf(
-                doubleArrayOf(a * f, 0.0, 0.0, 0.0),
-                doubleArrayOf(0.0, f, 0.0, 0.0),
-                doubleArrayOf(0.0, 0.0, q, 1.0),
-                doubleArrayOf(0.0, 0.0, (-parameters.near * q), 0.0)
+                doubleArrayOf(parameters.fov * a, 0.0, 0.0, 0.0),
+                doubleArrayOf(0.0, parameters.fov, 0.0, 0.0),
+                doubleArrayOf(0.0, 0.0, (parameters.far+ parameters.near)/(parameters.far- parameters.near), 1.0),
+                doubleArrayOf(0.0, 0.0, 1.0, 0.0)
             )
         )
 
@@ -117,6 +112,10 @@ class Scene() : JPanel() {
             val vectorB = line[1] * rot * clipMatrix
             drawLine(g2, vectorA, vectorB, width, height)
         }
+    }
+
+    fun update() {
+        repaint()
     }
 
     public override fun paintComponent(g: Graphics) {

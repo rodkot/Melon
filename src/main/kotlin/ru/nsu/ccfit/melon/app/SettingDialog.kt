@@ -10,18 +10,23 @@ import java.awt.GridLayout
 import javax.swing.JPanel
 
 
-class SettingFrame(context: Context) : PlumFrame(width = 400, height = 400, title = SceneSettingTool.tooltip) {
-    private val context: Context
+class SettingDialog(val context: Context) : PlumFrame(width = 500, height = 500, title = SceneSettingTool.tooltip) {
     private lateinit var pointsPanel: PointsPanel
 
     init {
-        this.context = context
         init()
     }
 
     private fun apply() {
+        context.parameters.fov =  40 * (Math.PI / 180.0)
         context.parameters.points = pointsPanel.scenePoints
         context.parameters.splineBasePoints = pointsPanel.basePoints
+
+        context.scene.update()
+    }
+
+    private fun save() {
+        apply()
         cancel()
     }
 
@@ -64,6 +69,7 @@ class SettingFrame(context: Context) : PlumFrame(width = 400, height = 400, titl
         c.weightx = 0.0
         all.add(controls, c)
         val buttons = JPanel(GridLayout(1, 4, 0, 0))
+        buttons.add(Button("Сохранить") { save() })
         buttons.add(Button("Принять") { apply() })
         buttons.add(Button("Отмена") { cancel() })
         c.fill = GridBagConstraints.BOTH
